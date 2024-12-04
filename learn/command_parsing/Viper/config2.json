@@ -1,0 +1,8 @@
+{
+  "contentdir": "content",
+  "port": 12345,
+  "taxonomies": {
+    "category": "categories",
+    "tag": "tags"
+  }
+}
