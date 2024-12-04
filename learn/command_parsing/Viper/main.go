@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/pflag"
+	"log"
 	"strings"
 	"time"
 
@@ -192,7 +193,7 @@ func ViperKVConfigFile() {
 			// 目前只测试了etcd支持
 			err := runtime_viper.WatchRemoteConfig()
 			if err != nil {
-				log.Errorf("unable to read remote config: %v", err)
+				log.Println("unable to read remote config: %v", err)
 				continue
 			}
 

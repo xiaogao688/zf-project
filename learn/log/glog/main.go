@@ -63,7 +63,7 @@ func main() {
 	}
 
 	// traceLocation可以打印出指定位置的栈信息（-log_backtrace_at=filename:line_number）
-	// 执行时加入参数 -log_backtrace_at=main.go:60
+	// 执行时加入参数 -log_backtrace_at=root.go:60
 	glog.Info("This is info message")
 
 	// 使用 Flush 确保所有日志被写入
