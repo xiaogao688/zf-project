@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Log Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        #log {
+            white-space: pre-wrap;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 500px;
+            overflow-y: scroll;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-Time Log Viewer</h1>
+    <div id="log">Connecting...</div>
+
+    <script>
+        // 建立 SSE 连接
+        const logDiv = document.getElementById('log');
+        const eventSource = new EventSource('/logs');
+
+        // 监听日志信息
+        eventSource.addEventListener('message', function(event) {
+            logDiv.textContent += event.data + '\n';
+            logDiv.scrollTop = logDiv.scrollHeight; // 滚动到底部
+        });
+
+        // 错误处理
+        eventSource.onerror = function() {
+            logDiv.textContent += '\n[ERROR] Connection lost. Trying to reconnect...\n';
+        };
+    </script>
+</body>
+</html>
