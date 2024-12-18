@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSONP Example</title>
+</head>
+<body>
+<h1>JSONP Example</h1>
+<script>
+    // 定义回调函数
+    function handleResponse(data) {
+        console.log("JSONP Response:", data);
+        alert("Message: " + data.message + ", Status: " + data.status);
+    }
+
+    // 动态创建 <script> 标签
+    var script = document.createElement('script');
+    script.src = 'http://localhost:8080/jsonp?callback=handleResponse';
+    document.body.appendChild(script);
+</script>
+</body>
+</html>
