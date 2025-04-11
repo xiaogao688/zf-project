@@ -1,0 +1,20 @@
+---
+# 没玩明白，暂时不用ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minio
+  namespace: minio-cluster
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: minio.devops.icu
+      http:
+        paths:
+          - backend:
+              service:
+                name: minio-svc
+                port:
+                  number: 8000
+            path: /
+            pathType: Prefix

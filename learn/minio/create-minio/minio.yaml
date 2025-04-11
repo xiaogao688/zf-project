@@ -1,0 +1,132 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: minio
+  name: minio-svc
+  namespace: minio-cluster
+spec:
+  ports:
+    - name: http
+      port: 9000
+      protocol: TCP
+      targetPort: 9000
+      nodePort: 30090  # 映射到外部的 30090 端口
+    - name: console
+      port: 8000
+      protocol: TCP
+      targetPort: 8000
+      nodePort: 30080  # 映射到外部的 30080 端口
+  selector:
+    app: minio
+  type: NodePort  # 设置为 NodePort 类型，允许外部访问
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-secret
+  namespace: minio-cluster
+stringData:
+  password: "qweASD123"
+  username: "admin"
+type: kubernetes.io/basic-auth
+---
+apiVersion: v1
+data:
+  .dockerconfigjson: "ewoJImF1dGhzIjogewoJCSJhcnRpZmFjdC5kb3NlYy5jbiI6IHsKCQkJImF1dGgiOiAiWkc5elpXTTZTMFZJYTNWdFUyWkhVWG96WldvPSIKCQl9LAoJCSJhcnRpZmFjdG9yeS5kb3NlYy5jbiI6IHsKCQkJImF1dGgiOiAiWjJGdmVtWTZJWEYzWlVGVFJERXlNdz09IgoJCX0KCX0KfQ=="
+kind: Secret
+metadata:
+  name: registry-key
+  namespace: minio-cluster
+  labels:
+    component: secret
+type: kubernetes.io/dockerconfigjson
+# echo -n '{"auths":{"artifactory.dosec.cn":{"username":"dev-cicd","password":"A7vVEX8Uma7UCh","email":"11@qq.com","auth":"created-token"}}}' | base64
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio
+  namespace: minio-cluster
+spec:
+  podManagementPolicy: Parallel
+  replicas: 4
+  selector:
+    matchLabels:
+      app: minio
+  serviceName: minio-svc
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      imagePullSecrets:
+        - name: registry-key
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: minio
+                    operator: In
+                    values:
+                      - "true"
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - minio
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - args:
+            - server
+            - http://minio-{0...3}.minio-svc.minio-storage.svc.cluster.local/data
+            - --console-address
+            - :8000
+            - --address
+            - :9000
+          env:
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: minio-secret
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: minio-secret
+          image: artifactory.dosec.cn/library/minio/minio:RELEASE.2025-01-20T14-49-07Z
+          imagePullPolicy: IfNotPresent
+          name: minio
+          ports:
+            - containerPort: 9000
+              name: http
+              protocol: TCP
+            - containerPort: 8000
+              name: console
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2048Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          volumeMounts:
+            - mountPath: /data
+              name: minio
+  # 自动申领 pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: minio
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
