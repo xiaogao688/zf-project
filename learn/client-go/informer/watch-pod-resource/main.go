@@ -15,6 +15,7 @@ import (
 	"os"
 	"sync/atomic"
 	"time"
+	"unsafe"
 )
 
 type Asset struct {
@@ -28,10 +29,10 @@ func main() {
 	flag.Parse()
 
 	// 资源监控
-	go logResourceUsage("D:\\work\\zf-project\\learn\\client-go\\informer\\watch-pod-resource\\log")
+	//go logResourceUsage("D:\\work\\zf-project\\learn\\client-go\\informer\\watch-pod-resource\\log")
 
 	// 读取 kubeconfig 文件路径（修改为你自己的 kubeconfig 路径）
-	kubeconfig := flag.String("kubeconfig", "D:\\work\\zf-project\\learn\\client-go\\informer\\config", "Path to a kubeconfig file")
+	kubeconfig := flag.String("kubeconfig", "D:\\work\\zf-project\\learn\\client-go\\informer\\config4-137", "Path to a kubeconfig file")
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
 		klog.Fatalf("构建 kubeconfig 失败: %v", err)
@@ -76,13 +77,14 @@ func main() {
 	// 为 Pod informer 添加事件处理器
 	podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
-			//pod := obj.(*v1.Pod)
+			pod := obj.(*v1.Pod)
+			fmt.Println("pod size: ", unsafe.Sizeof(*pod))
 			if atomic.LoadInt32(&initialSyncComplete) == 0 {
 				// 此时为初始加载阶段
-				//fmt.Printf("初始加载 Pod: %s/%s\n", pod.Namespace, pod.Name)
+				fmt.Printf("初始加载 Pod: %s/%s\n", pod.Namespace, pod.Name)
 			} else {
 				// 后续新增的 Pod
-				//fmt.Printf("新增 Pod: %s/%s\n", pod.Namespace, pod.Name)
+				//fmt.Printf("新增 Pod: %s/%s -- %s\n", pod.Namespace, pod.Name, pod.Spec.NodeName)
 			}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
@@ -92,22 +94,22 @@ func main() {
 			// 比较 Pod Spec 的差异
 			specDiff := cmp.Diff(oldPod.Spec, newPod.Spec)
 			if specDiff != "" {
-				//fmt.Printf("Pod 配置（Spec）更新: %s/%s\nDiff: %s\n", newPod.Namespace, newPod.Name, specDiff)
+				//fmt.Printf("Pod 配置（Spec）更新: %s/%s -- %s\nDiff: %s\n", newPod.Namespace, newPod.Name, newPod.Spec.NodeName, specDiff[:1])
 			}
 			// 比较 Pod Status 的差异
 			statusDiff := cmp.Diff(oldPod.Status.ContainerStatuses, newPod.Status.ContainerStatuses)
 			if statusDiff != "" {
-				//fmt.Printf("Pod 状态（Status）更新: %s/%s\nDiff: %s\n", newPod.Namespace, newPod.Name, statusDiff)
+				//fmt.Printf("Pod 状态（Status）更新: %s/%s -- %s\nDiff: %s\n", newPod.Namespace, newPod.Name, newPod.Spec.NodeName, statusDiff[:1])
 			}
 
 			// 如果两个部分都没变化，也可以记录一下更新事件（通常不会发生）
 			if specDiff == "" && statusDiff == "" {
-				//fmt.Printf("Pod 更新，但无明显差异: %s/%s\n", newPod.Namespace, newPod.Name)
+				//fmt.Printf("Pod 更新，但无明显差异: %s/%s -- %s\n", newPod.Namespace, newPod.Name, newPod.Spec.NodeName)
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
-			pod := obj.(*v1.Pod)
-			fmt.Printf("删除 Pod: %s/%s\n", pod.Namespace, pod.Name)
+			//pod := obj.(*v1.Pod)
+			//fmt.Printf("删除 Pod: %s/%s -- %s\n", pod.Namespace, pod.Name, pod.Spec.NodeName)
 		},
 	})
 
