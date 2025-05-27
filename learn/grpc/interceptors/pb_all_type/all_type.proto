@@ -1,0 +1,52 @@
+syntax = "proto3";
+package pb_all_type;
+
+// protoc-gen-go要求pb文件必须指定go包的路径
+option go_package = "github.com/xiaogao688/zf-project/learn/grpc/interceptors/pb_all_type;pb_all_type";
+
+message AllTypes {
+  // 双精度浮点数，对应 Go float64
+  double  double_field   = 1;
+
+  // 单精度浮点数，对应 Go float32
+  float   float_field    = 2;
+
+  // 可变长度编码的 32 位有符号整数
+  int32   int32_field    = 3;
+
+  // 可变长度编码的 64 位有符号整数
+  int64   int64_field    = 4;
+
+  // 可变长度编码的 32 位无符号整数
+  uint32  uint32_field   = 5;
+
+  // 可变长度编码的 64 位无符号整数
+  uint64  uint64_field   = 6;
+
+  // 可变长度编码的 32 位有符号整数，使用 ZigZag 编码提高负数效率
+  sint32  sint32_field   = 7;
+
+  // 可变长度编码的 64 位有符号整数，使用 ZigZag 编码提高负数效率
+  sint64  sint64_field   = 8;
+
+  // 固定长度 4 字节的无符号整数，常用于值范围已知的小整数
+  fixed32 fixed32_field  = 9;
+
+  // 固定长度 8 字节的无符号整数，常用于值范围已知的大整数
+  fixed64 fixed64_field  = 10;
+
+  // 固定长度 4 字节的有符号整数
+  sfixed32 sfixed32_field = 11;
+
+  // 固定长度 8 字节的有符号整数
+  sfixed64 sfixed64_field = 12;
+
+  // 布尔值，对应 Go bool
+  bool    bool_field     = 13;
+
+  // UTF-8 编码的字符串，长度不超过 2^32-1
+  string  string_field   = 14;
+
+  // 任意字节序列，长度不超过 2^32-1
+  bytes   bytes_field    = 15;
+}

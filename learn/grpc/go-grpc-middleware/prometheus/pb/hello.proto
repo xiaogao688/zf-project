@@ -1,0 +1,21 @@
+syntax = "proto3";
+package pb;
+
+// protoc-gen-go要求pb文件必须指定go包的路径
+option go_package = "github.com/xiaogao688/zf-project/learn/grpc/go-grpc-middleware/prometheus/pb;pb";
+
+
+
+service RpcServer {
+  rpc SayHello(Request) returns (Reply);
+}
+
+message Request {
+  string msg = 1;
+}
+
+message Reply {
+  string msg = 1;
+}
+
+// protoc   -I./ --go_out=paths=source_relative:./   --go-grpc_out=paths=source_relative:./   pb/hello.proto

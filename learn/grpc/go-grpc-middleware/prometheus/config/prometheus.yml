@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'grpc_example'
+    metrics_path: /metrics
+    static_configs:
+      - targets: [ 'localhost:9092' ]
+
+
+#  docker run -d \
+#  -p 9090:9090 \
+#  -v $(pwd)/prometheus.yml:/etc/prometheus/prometheus.yml \
+#  prom/prometheus
+
+# 查看平均成功数量
+# sum by(grpc_code) (rate(grpc_server_handled_total{grpc_code="OK"}[1m]))

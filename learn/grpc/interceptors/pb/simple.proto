@@ -1,0 +1,44 @@
+syntax = "proto3";
+package pb;
+
+// protoc-gen-go要求pb文件必须指定go包的路径
+option go_package = "github.com/xiaogao688/zf-project/learn/grpc/interceptors/pb;pb";
+
+import "pb_all_type/all_type.proto";
+
+service RpcServer {
+  // 简单 RPC
+  rpc SayHello(Result) returns (Reply);
+  // 客户端流
+  rpc ClientStream(stream Result) returns (Reply);
+  // 服务端流
+  rpc ServerStream(Result) returns (stream Reply);
+  // 双向流
+  rpc BidiStream(stream Result) returns (stream Reply);
+}
+
+enum Corpus {
+  UNIVERSAL = 0;
+  WEB = 1;
+  IMAGES = 2;
+  LOCAL = 3;
+  NEWS = 4;
+  PRODUCTS = 5;
+  VIDEO = 6;
+}
+
+message Reply {
+  string msg = 1;
+}
+
+message Result {
+  string url = 1;
+  int32 id = 2;
+  repeated string snippets = 3; // 数组
+  Corpus corpus = 4; // 枚举
+  pb_all_type.AllTypes all_types = 5;
+}
+
+
+// -IPath，--proto_path=Path  在哪个路径下搜索.proto文件
+//  protoc   -I./ --go_out=paths=source_relative:./   --go-grpc_out=paths=source_relative:./   pb/simple.proto  pb_all_type/all_type.proto
